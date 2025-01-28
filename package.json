@@ -1,35 +1,31 @@
 {
   "name": "template-api",
   "version": "1.0.0",
-  "description": "template with login routes and controllers",
-  "main": "index.js",
+  "description": "",
+  "type": "module",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.js"
+    "start": "node .",
+    "dev": "nodemon ."
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/org-sistemas-sn/template-api.git"
-  },
-  "author": "Municipalidad SN",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/org-sistemas-sn/template-api/issues"
-  },
-  "homepage": "https://github.com/org-sistemas-sn/template-api#readme",
-  "dependencies": {
-    "basic-ftp": "^5.0.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.1",
-    "express": "^4.18.1",
-    "express-fileupload": "^1.4.0",
-    "jsonwebtoken": "^8.5.1",
-    "knex": "^2.0.0",
-    "md5": "^2.3.0",
-    "mysql2": "^2.3.3",
-    "nodemailer": "^6.8.0"
-  },
   "devDependencies": {
-    "nodemon": "^2.0.16"
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "basic-ftp": "^5.0.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.30.1",
+    "mysql2": "^2.3.3",
+    "nodemailer": "^6.8.0",
+    "sequelize": "^6.25.3",
+    "uuid": "^11.0.4",
+    "xlsx": "^0.18.5"
   }
 }
