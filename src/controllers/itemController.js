@@ -19,6 +19,23 @@ export const getItemById = async (req, res) => {
     }
 };
 
+
+export const getItemsByThemeId = async (req, res) => {
+    try {
+        const { themeId } = req.params;
+        const items = await Item.findAll({ where: { id_theme: themeId } }); // Cambiado a id_theme
+
+        if (!items.length) {
+            return res.status(404).json({ error: "No items found for this theme" });
+        }
+
+        res.json(items);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 export const createItem = async (req, res) => {
     try {
         const newItem = await Item.create(req.body);

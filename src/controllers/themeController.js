@@ -49,3 +49,19 @@ export const deleteTheme = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const getThemesBySectionId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const themes = await Theme.findAll({ where: { id_section: id } });
+
+        if (!themes.length) {
+            return res.status(404).json({ error: "No themes found for this section" });
+        }
+
+        res.json(themes);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+

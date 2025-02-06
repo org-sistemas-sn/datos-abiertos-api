@@ -4,6 +4,7 @@ import {
     getItemById,
     createItem,
     updateItem,
+    getItemsByThemeId,
     deleteItem
 } from "../controllers/itemController.js";
 import {
@@ -18,6 +19,7 @@ import {
     getThemeById,
     createTheme,
     updateTheme,
+    getThemesBySectionId,
     deleteTheme
 } from "../controllers/themeController.js";
 
@@ -29,12 +31,14 @@ router.get("/status", (req, res) => {
 
 router.get("/items", getAllItems);
 router.get("/items/:id", getItemById);
+router.get("/themes/:themeId/items", getItemsByThemeId);
 router.post("/items", createItem);
 router.put("/items/:id", updateItem);
 router.delete("/items/:id", deleteItem);
 
 router.get("/sections", getAllSections);
 router.get("/sections/:id", getSectionById);
+router.get("/sections/:id/themes", getThemesBySectionId);
 router.post("/sections", createSection);
 router.put("/sections/:id", updateSection);
 router.delete("/sections/:id", deleteSection);
