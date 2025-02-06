@@ -31,7 +31,7 @@ const Item = sequelize.define(
         type: {
             type: DataTypes.STRING,
         },
-        update_date: {
+        publication_date: {
             type: DataTypes.STRING,
         },
         enabled: {

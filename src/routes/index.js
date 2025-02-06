@@ -1,13 +1,48 @@
 import { Router } from "express";
-import { messages } from "../constants/index.js"
+import {
+    getAllItems,
+    getItemById,
+    createItem,
+    updateItem,
+    deleteItem
+} from "../controllers/itemController.js";
+import {
+    getAllSections,
+    getSectionById,
+    createSection,
+    updateSection,
+    deleteSection
+} from "../controllers/sectionController.js";
+import {
+    getAllThemes,
+    getThemeById,
+    createTheme,
+    updateTheme,
+    deleteTheme
+} from "../controllers/themeController.js";
 
-const router = new Router();
+const router = Router();
 
 router.get("/status", (req, res) => {
-  res.status(200).json({ status: messages.SERVER_STATUS });
-});
+    res.status(200).json({ status: "OK", message: "API is running" });
+})
 
-// Mejorar para direcciones no definidas (que no partan de /api)
-router.all("*", (req, res) => res.send("Not found"));
+router.get("/items", getAllItems);
+router.get("/items/:id", getItemById);
+router.post("/items", createItem);
+router.put("/items/:id", updateItem);
+router.delete("/items/:id", deleteItem);
+
+router.get("/sections", getAllSections);
+router.get("/sections/:id", getSectionById);
+router.post("/sections", createSection);
+router.put("/sections/:id", updateSection);
+router.delete("/sections/:id", deleteSection);
+
+router.get("/themes", getAllThemes);
+router.get("/themes/:id", getThemeById);
+router.post("/themes", createTheme);
+router.put("/themes/:id", updateTheme);
+router.delete("/themes/:id", deleteTheme);
 
 export default router;

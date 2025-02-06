@@ -23,7 +23,7 @@ export const syncDb = async () => {
   try {
     await sequelize.sync({
       alter: config.NODE_ENV === "development" ? true : false,
-      force: true,
+      force: false,
     });
     console.log(messages.DB_SUCCESSFULLY_RUNNING);
   } catch (error) {
