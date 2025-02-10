@@ -19,6 +19,9 @@ const Item = sequelize.define(
         description: {
             type: DataTypes.STRING,
         },
+        url_or_ftp_path: {
+            type: DataTypes.STRING,
+        },
         id_theme: {
             type: DataTypes.INTEGER, 
             references: {
@@ -30,8 +33,17 @@ const Item = sequelize.define(
         },
         type: {
             type: DataTypes.STRING,
+            set(value) {
+                this.setDataValue("type", value?.toUpperCase());
+            },
         },
         publication_date: {
+            type: DataTypes.STRING,
+        },
+        responsible: {
+            type: DataTypes.STRING,
+        },
+        maintenance: {
             type: DataTypes.STRING,
         },
         enabled: {

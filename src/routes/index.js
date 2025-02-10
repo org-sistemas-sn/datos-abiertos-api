@@ -5,7 +5,8 @@ import {
     createItem,
     updateItem,
     getItemsByThemeId,
-    deleteItem
+    deleteItem,
+    getItemFile
 } from "../controllers/itemController.js";
 import {
     getAllSections,
@@ -31,6 +32,7 @@ router.get("/status", (req, res) => {
 
 router.get("/items", getAllItems);
 router.get("/items/:id", getItemById);
+router.get("/items/:id/file", getItemFile);
 router.get("/themes/:themeId/items", getItemsByThemeId);
 router.post("/items", createItem);
 router.put("/items/:id", updateItem);
