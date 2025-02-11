@@ -8,7 +8,6 @@ import { messages } from "./constants/index.js";
 import { setRequestOrigin } from "./middlewares/index.js";
 import { checkFtpServerConnection } from "./utils/ftp/index.js";
 import { checkEmailServerConnection } from "./utils/nodemailer/index.js";
-import { Theme, Item, Section } from "./models/index.js";
 
 syncDb();
 

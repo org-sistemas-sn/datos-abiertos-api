@@ -17,8 +17,13 @@ const FTP_SERVER_PATH = "https://staticcontent.sannicolasciudad.gob.ar/images/da
 export const getItemFile = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log(`📌 Buscando item con ID: ${id}`);
+
         const item = await Item.findByPk(id);
-        if (!item) return res.status(404).json({ error: "Item not found" });
+        if (!item) {
+            console.log("❌ Item no encontrado");
+            return res.status(404).json({ error: "Item not found" });
+        }
 
         const fileType = item.type?.toUpperCase();
         const fileName = item.url_or_ftp_path;
@@ -29,74 +34,104 @@ export const getItemFile = async (req, res) => {
         } else if (fileType === "CSV") {
             fileUrl = `${FTP_SERVER_PATH}csv/${fileName}`;
         } else {
+            console.log("❌ Tipo de archivo inválido:", fileType);
             return res.status(400).json({ error: "Invalid file type" });
         }
 
         const tempFilePath = path.join(TEMP_DIRECTORY, fileName);
+        console.log(`📌 Temp file path: ${tempFilePath}`);
+        console.log(`📌 Descargando archivo desde: ${fileUrl}`);
 
-        // 📌 **Asegurar que la carpeta TEMP existe**
         if (!fs.existsSync(TEMP_DIRECTORY)) {
+            console.log("📂 Creando directorio TEMP...");
             fs.mkdirSync(TEMP_DIRECTORY, { recursive: true });
         }
 
-        // 📌 **Descargar el archivo desde el FTP**
+        // 📌 **Descargar el archivo desde el FTP con un Stream controlado**
         const fileStream = fs.createWriteStream(tempFilePath);
 
         https.get(fileUrl, (response) => {
+            console.log(`📌 Respuesta del servidor: ${response.statusCode}`);
             if (response.statusCode !== 200) {
+                console.log(`❌ Archivo no encontrado en el FTP (${response.statusCode}): ${fileUrl}`);
                 return res.status(404).json({ error: "File not found on FTP" });
             }
 
+            // 📌 Controlar la descarga en tiempo real
+            let downloadedBytes = 0;
+            response.on("data", (chunk) => {
+                downloadedBytes += chunk.length;
+                process.stdout.write(`⬇️ Descargando... ${Math.round(downloadedBytes / 1024)} KB\r`);
+            });
+
             response.pipe(fileStream);
 
-            fileStream.on("finish", () => {
-                fileStream.close(); // Asegurar que la descarga terminó antes de procesar
+            fileStream.on("finish", async () => {
+                console.log(`✅ Descarga completada: ${tempFilePath}`);
+                fileStream.close();
 
-                if (fileType === "CSV") {
-                    const results = [];
-                    fs.createReadStream(tempFilePath)
-                        .pipe(csvParser())
-                        .on("data", (data) => results.push(data))
-                        .on("end", () => {
-                            fs.unlinkSync(tempFilePath); // Eliminar archivo después de leerlo
-                            res.json({ type: "CSV", data: results });
-                        })
-                        .on("error", (err) => {
-                            console.error("Error reading CSV:", err);
-                            res.status(500).json({ error: "Error processing CSV file" });
-                        });
+                try {
+                    if (fileType === "CSV") {
+                        console.log("📌 Procesando archivo CSV...");
+                        const results = [];
 
-                } else if (fileType === "XLSX") {
-                    try {
-                        const workbook = xlsx.readFile(tempFilePath);
-                        const sheetName = workbook.SheetNames[0];
-                        const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                        fs.createReadStream(tempFilePath)
+                            .pipe(csvParser())
+                            .on("data", (data) => results.push(data))
+                            .on("end", async () => {
+                                console.log(`✅ CSV leído correctamente: ${fileName}`);
+                                await fs.promises.unlink(tempFilePath);
+                                console.log("✅ Archivo eliminado correctamente");
+                                res.json({ type: "CSV", data: results });
+                            })
+                            .on("error", async (err) => {
+                                console.error("❌ Error leyendo CSV:", err);
+                                await fs.promises.unlink(tempFilePath);
+                                res.status(500).json({ error: "Error processing CSV file" });
+                            });
 
-                        fs.unlinkSync(tempFilePath); // Eliminar archivo después de leerlo
-                        res.json({ type: "XLSX", data: sheetData });
+                    } else if (fileType === "XLSX") {
+                        console.log("📌 Procesando archivo XLSX...");
+                        try {
+                            await new Promise((resolve) => setTimeout(resolve, 500));
+                            const workbook = xlsx.readFile(tempFilePath);
+                            const sheetName = workbook.SheetNames[0];
+                            const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-                    } catch (err) {
-                        console.error("Error reading XLSX:", err);
-                        res.status(500).json({ error: "Error processing XLSX file" });
+                            console.log(`✅ XLSX leído correctamente: ${fileName}`);
+                            await fs.promises.unlink(tempFilePath);
+                            console.log("✅ Archivo eliminado correctamente");
+                            res.json({ type: "XLSX", data: sheetData });
+
+                        } catch (err) {
+                            console.error("❌ Error leyendo XLSX:", err);
+                            await fs.promises.unlink(tempFilePath);
+                            res.status(500).json({ error: "Error processing XLSX file" });
+                        }
                     }
+                } catch (error) {
+                    console.error("❌ Error procesando archivo:", error);
+                    res.status(500).json({ error: "Error processing the file" });
                 }
             });
 
             fileStream.on("error", (err) => {
-                console.error("Error downloading file:", err);
+                console.error("❌ Error descargando archivo:", err);
                 res.status(500).json({ error: "Error downloading file from FTP" });
             });
 
         }).on("error", (err) => {
-            console.error("Error fetching file from FTP:", err);
+            console.error("❌ Error obteniendo archivo desde el FTP:", err);
             res.status(500).json({ error: "Error retrieving file from FTP" });
         });
 
     } catch (error) {
-        console.error("Error processing file:", error);
+        console.error("❌ Error general al procesar el archivo:", error);
         res.status(500).json({ error: "Error retrieving the file" });
     }
 };
+
+
 
 export const getItemSectionAndTheme = async (req, res) => {
     try {
