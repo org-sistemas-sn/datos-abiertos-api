@@ -5,7 +5,7 @@ import corsOptions from "./cors/index.js";
 
 const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
-  PORT: process.env.PORT || 8081,
+  PORT: process.env.PORT || 8080,
 
   CORS_OPTIONS: corsOptions,
 

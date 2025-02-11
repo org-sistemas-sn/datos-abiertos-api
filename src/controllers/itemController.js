@@ -5,6 +5,9 @@ import https from "https";
 import csvParser from "csv-parser";
 import xlsx from "xlsx";
 import Item from "../models/items/index.js";
+import Theme from "../models/themes/index.js";
+import Section from "../models/sections/index.js";
+import { Op } from "sequelize";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -95,6 +98,85 @@ export const getItemFile = async (req, res) => {
     }
 };
 
+export const getItemSectionAndTheme = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // 📌 Buscar el item por su ID
+        const item = await Item.findByPk(id);
+
+        if (!item) {
+            return res.status(404).json({ error: "Item not found" });
+        }
+
+        // 📌 Buscar el tema asociado al item
+        const theme = await Theme.findByPk(item.id_theme);
+
+        // 📌 Buscar todos los items que pertenecen a este theme (SIN include)
+        let items = [];
+        if (theme) {
+            items = await Item.findAll({
+                where: { id_theme: theme.id },
+            });
+        }
+
+        // 📌 Buscar la sección asociada al tema (si el tema existe)
+        let section = null;
+        if (theme) {
+            section = await Section.findByPk(theme.id_section);
+        }
+
+        // 📌 Construir la respuesta
+        const response = {
+            item,
+            theme: theme ? {
+                id: theme.id,
+                name: theme.name,
+                description: theme.description,
+                id_section: theme.id_section,
+                items: items // 📌 Ahora el theme contiene todos los items relacionados
+            } : null,
+            section: section || null
+        };
+
+        res.json(response);
+    } catch (error) {
+        console.error("Error al obtener sección y tema del item:", error);
+        res.status(500).json({ error: "Error retrieving section and theme" });
+    }
+};
+
+
+
+export const getItemsByName = async (req, res) => {
+    try {
+        const { name } = req.query;
+
+        console.log("Nombre recibido:", name);
+
+        if (!name) {
+            return res.status(400).json({ error: "El parámetro 'name' es obligatorio" });
+        }
+
+        // Búsqueda insensible a mayúsculas/minúsculas para MySQL
+        const items = await Item.findAll({
+            where: {
+                name: {
+                    [Op.like]: `%${name}%` // LIKE es compatible con MySQL
+                },
+            },
+        });
+
+        if (!items.length) {
+            return res.status(404).json({ error: "No se encontraron items con ese nombre" });
+        }
+
+        res.json(items);
+    } catch (error) {
+        console.error("Error al buscar los items por nombre:", error);
+        res.status(500).json({ error: "Error al buscar los items" });
+    }
+};
 
 
 export const getAllItems = async (req, res) => {

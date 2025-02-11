@@ -6,7 +6,9 @@ import {
     updateItem,
     getItemsByThemeId,
     deleteItem,
-    getItemFile
+    getItemFile,
+    getItemsByName,
+    getItemSectionAndTheme
 } from "../controllers/itemController.js";
 import {
     getAllSections,
@@ -30,13 +32,16 @@ router.get("/status", (req, res) => {
     res.status(200).json({ status: "OK", message: "API is running" });
 })
 
+router.get("/items/search", getItemsByName);
 router.get("/items", getAllItems);
 router.get("/items/:id", getItemById);
 router.get("/items/:id/file", getItemFile);
 router.get("/themes/:themeId/items", getItemsByThemeId);
+router.get("/items/:id/section-theme", getItemSectionAndTheme);
 router.post("/items", createItem);
 router.put("/items/:id", updateItem);
 router.delete("/items/:id", deleteItem);
+
 
 router.get("/sections", getAllSections);
 router.get("/sections/:id", getSectionById);
