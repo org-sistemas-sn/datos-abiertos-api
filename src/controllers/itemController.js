@@ -5,6 +5,7 @@ import https from "https";
 import csvParser from "csv-parser";
 import xlsx from "xlsx";
 import Item from "../models/items/index.js";
+
 import Theme from "../models/themes/index.js";
 import Section from "../models/sections/index.js";
 import { Op } from "sequelize";
@@ -13,6 +14,56 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const TEMP_DIRECTORY = path.join(__dirname, "../temp/");
 const FTP_SERVER_PATH = "https://staticcontent.sannicolasciudad.gob.ar/images/datos-abiertos/";
+
+const DATA_DIRECTORY = path.join(__dirname, "../data/");
+
+export const getItemData = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const item = await Item.findByPk(id);
+        
+        if (!item) {
+            console.log("❌ Item no encontrado");
+            return res.status(404).json({ error: "Item not found" });
+        }
+        
+        const fileName = item.url_or_ftp_path;
+        const filePath = path.join(DATA_DIRECTORY, fileName);
+        
+        console.log(`📌 Buscando archivo en carpeta data: ${fileName}`);
+        
+        if (!fs.existsSync(filePath)) {
+            console.log("❌ Archivo no encontrado en la carpeta data");
+            return res.status(404).json({ error: "File not found in data directory" });
+        }
+        
+        console.log(`✅ Archivo encontrado: ${filePath}`);
+        
+        if (item.type === "CSV") {
+            const results = [];
+            fs.createReadStream(filePath)
+                .pipe(csvParser())
+                .on("data", (data) => results.push(data))
+                .on("end", () => {
+                    res.json({ type: "CSV", data: results });
+                });
+        } else if (item.type === "XLSX") {
+            const workbook = xlsx.readFile(filePath);
+            const sheetName = workbook.SheetNames[0];
+            const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+            res.json({ type: "XLSX", data: sheetData });
+        } else {
+            console.log("⚠️ Tipo de archivo no soportado");
+            return res.status(400).json({ error: "Unsupported file type" });
+        }
+    } catch (error) {
+        console.error("❌ Error al recuperar el archivo:", error);
+        res.status(500).json({ error: "Error retrieving the file" });
+    }
+};
+
+
 
 export const getItemFile = async (req, res) => {
     try {
@@ -130,7 +181,6 @@ export const getItemFile = async (req, res) => {
         res.status(500).json({ error: "Error retrieving the file" });
     }
 };
-
 
 
 export const getItemSectionAndTheme = async (req, res) => {
