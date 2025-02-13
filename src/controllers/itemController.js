@@ -20,48 +20,61 @@ const DATA_DIRECTORY = path.join(__dirname, "../data/");
 export const getItemData = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const item = await Item.findByPk(id);
-        
         if (!item) {
             console.log("❌ Item no encontrado");
             return res.status(404).json({ error: "Item not found" });
         }
-        
+
         const fileName = item.url_or_ftp_path;
         const filePath = path.join(DATA_DIRECTORY, fileName);
-        
+
         console.log(`📌 Buscando archivo en carpeta data: ${fileName}`);
-        
+
         if (!fs.existsSync(filePath)) {
             console.log("❌ Archivo no encontrado en la carpeta data");
             return res.status(404).json({ error: "File not found in data directory" });
         }
-        
+
         console.log(`✅ Archivo encontrado: ${filePath}`);
-        
+
         if (item.type === "CSV") {
-            const results = [];
+            const last10Records = [];
+            let totalLines = 0;
+
             fs.createReadStream(filePath)
                 .pipe(csvParser())
-                .on("data", (data) => results.push(data))
+                .on("data", (data) => {
+                    if (last10Records.length >= 10) {
+                        last10Records.shift(); // 🔥 Mantiene solo los últimos 10
+                    }
+                    last10Records.push(data);
+                    totalLines++;
+                })
                 .on("end", () => {
-                    res.json({ type: "CSV", data: results });
+                    console.log(`📄 CSV procesado, total líneas: ${totalLines}, enviando últimos 10.`);
+                    res.json({ type: "CSV", data: last10Records });
                 });
+
         } else if (item.type === "XLSX") {
-            const workbook = xlsx.readFile(filePath);
+            const workbook = xlsx.readFile(filePath, { sheetRows: 10 }); // 🔥 Solo lee 10 filas
             const sheetName = workbook.SheetNames[0];
             const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+            console.log(`📄 XLSX procesado, enviando últimos 10 registros.`);
             res.json({ type: "XLSX", data: sheetData });
+
         } else {
             console.log("⚠️ Tipo de archivo no soportado");
             return res.status(400).json({ error: "Unsupported file type" });
         }
+
     } catch (error) {
         console.error("❌ Error al recuperar el archivo:", error);
         res.status(500).json({ error: "Error retrieving the file" });
     }
-};
+}
 
 
 
