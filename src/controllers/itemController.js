@@ -27,66 +27,35 @@ export const getItemData = async (req, res) => {
             return res.status(404).json({ error: "Item not found" });
         }
 
-        const fileName = item.url_or_ftp_path;
-        const filePath = path.join(DATA_DIRECTORY, fileName);
-
-        console.log(`📌 Buscando archivo en carpeta data: ${fileName}`);
-
+        let fileName = item.url_or_ftp_path;
+        
+        // Si el tipo es CSV, siempre buscar el archivo XLSX con el mismo nombre
+        if (item.type === "CSV") {
+            fileName = fileName.replace(/\.csv$/i, ".xlsx");
+            console.log(`🔄 Tipo CSV detectado, buscando archivo equivalente XLSX: ${fileName}`);
+        }
+        
+        let filePath = path.join(DATA_DIRECTORY, fileName);
+        
         if (!fs.existsSync(filePath)) {
-            console.log("❌ Archivo no encontrado en la carpeta data");
-            return res.status(404).json({ error: "File not found in data directory" });
+            console.log("❌ Archivo XLSX no encontrado en la carpeta data");
+            return res.status(404).json({ error: "XLSX file not found in data directory" });
         }
 
         console.log(`✅ Archivo encontrado: ${filePath}`);
 
-        if (item.type === "CSV") {
-            const results = [];
-            const headers = new Set();
-            let rowCount = 0;
-            let detectedSeparator = ";";
+        const workbook = xlsx.readFile(filePath, { sheetRows: 10 }); // Cargar solo las últimas filas disponibles
+        const sheetName = workbook.SheetNames[0];
+        const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        const last10Records = sheetData.slice(-10); // 🔥 Solo los últimos 10 registros
 
-            // Detectar separador dinámicamente
-            const firstLine = fs.readFileSync(filePath, "utf8").split("\n")[0];
-            if (firstLine.includes(",")) {
-                detectedSeparator = ",";
-            }
-
-            fs.createReadStream(filePath)
-                .pipe(csvParser({ separator: detectedSeparator, skipLines: 0, headers: true }))
-                .on("data", (row) => {
-                    if (results.length >= 10) {
-                        results.shift();
-                    }
-                    Object.keys(row).forEach((key) => {
-                        row[key.trim()] = row[key].trim() === "" ? null : row[key].trim();
-                        headers.add(key.trim());
-                    });
-                    results.push(row);
-                })
-                .on("end", () => {
-                    console.log(`📄 CSV procesado con separador '${detectedSeparator}', total registros: ${rowCount}, enviando los últimos 10.`);
-                    res.json({ type: "CSV", headers: Array.from(headers), data: results });
-                });
-        } else if (item.type === "XLSX") {
-            const workbook = xlsx.readFile(filePath);
-            const sheetName = workbook.SheetNames[0];
-            const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-            const last10Records = sheetData.slice(-10); // 🔥 Solo los últimos 10 registros
-
-            console.log(`📄 XLSX procesado, total registros: ${sheetData.length}, enviando los últimos 10.`);
-            res.json({ type: "XLSX", headers: Object.keys(sheetData[0] || {}), data: last10Records });
-        } else {
-            console.log("⚠️ Tipo de archivo no soportado");
-            return res.status(400).json({ error: "Unsupported file type" });
-        }
+        console.log(`📄 XLSX procesado, enviando los últimos 10 registros.`);
+        res.json({ type: "XLSX", headers: Object.keys(sheetData[0] || {}), data: last10Records });
     } catch (error) {
         console.error("❌ Error al recuperar el archivo:", error);
         res.status(500).json({ error: "Error retrieving the file" });
     }
 };
-
-
-
 
 
 export const getItemFile = async (req, res) => {
