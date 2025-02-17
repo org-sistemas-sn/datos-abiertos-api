@@ -1,4 +1,4 @@
-import { Op } from "sequelize"
+import { Op } from "sequelize";
 import EventDate from "../models/eventsDates/index.js";
 
 // Obtener todas las fechas de eventos
@@ -7,6 +7,7 @@ export const getAllEventDates = async (req, res) => {
         const eventDates = await EventDate.findAll({
             where: { enabled: true }, // Solo eventos activos
             order: [["date", "ASC"]], // Ordenados por fecha
+            attributes: ["id", "date", "title", "description", "img_path", "enabled"] // Asegurar que el ID se incluya
         });
         res.status(200).json(eventDates);
     } catch (error) {
@@ -48,7 +49,8 @@ export const getEventDatesByMonthYear = async (req, res) => {
                 },
                 enabled: true // Solo traer eventos activos
             },
-            order: [["date", "ASC"]]
+            order: [["date", "ASC"]],
+            attributes: ["id", "date", "title", "description", "img_path", "enabled"]
         });
 
         res.status(200).json(eventDates);
@@ -58,13 +60,13 @@ export const getEventDatesByMonthYear = async (req, res) => {
     }
 };
 
-
-
 // Obtener una fecha de evento por ID
 export const getEventDateById = async (req, res) => {
     try {
         const { id } = req.params;
-        const eventDate = await EventDate.findByPk(id);
+        const eventDate = await EventDate.findByPk(id, {
+            attributes: ["id", "date", "title", "description", "img_path" , "enabled"]
+        });
         if (!eventDate) {
             return res.status(404).json({ error: "Fecha de evento no encontrada" });
         }

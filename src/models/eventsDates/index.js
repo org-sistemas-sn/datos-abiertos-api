@@ -21,6 +21,10 @@ const EventDate = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: true,
         },
+        img_path: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
         enabled: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
