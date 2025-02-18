@@ -3,6 +3,7 @@ import itemRoutes from "./itemRoutes.js";
 import sectionRoutes from "./sectionRoutes.js";
 import eventDateRoutes from "./eventDateRoutes.js";
 import themeRoutes from "./themeRoutes.js";
+import gisDetail from "./gisDetailRoutes.js"
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.use("/items", itemRoutes);
 router.use("/sections", sectionRoutes);
 router.use("/event", eventDateRoutes);
 router.use("/themes", themeRoutes);
+router.use("/gis-details", gisDetail)
 
 export default router;

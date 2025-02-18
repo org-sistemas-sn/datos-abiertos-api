@@ -37,8 +37,8 @@ const GisDetail = sequelize.define(
             allowNull: true,
         },
         smm: {
-            type: DataTypes.STRING,
-            allowNull: true,
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         },
         management: {
             type: DataTypes.STRING,

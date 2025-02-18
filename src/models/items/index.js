@@ -46,6 +46,10 @@ const Item = sequelize.define(
         maintenance: {
             type: DataTypes.STRING,
         },
+        have_gis_detail: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false, 
+        },
         enabled: {
             type: DataTypes.BOOLEAN,
             defaultValue: true, 
