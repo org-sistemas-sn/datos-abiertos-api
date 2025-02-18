@@ -80,12 +80,12 @@ export const getEventDateById = async (req, res) => {
 // Crear una nueva fecha de evento
 export const createEventDate = async (req, res) => {
     try {
-        const { date, title, description } = req.body;
+        const { date, title, description, img_path } = req.body;
         if (!date || !title) {
             return res.status(400).json({ error: "La fecha y el título son obligatorios" });
         }
 
-        const newEventDate = await EventDate.create({ date, title, description });
+        const newEventDate = await EventDate.create({ date, title, description, img_path });
         res.status(201).json(newEventDate);
     } catch (error) {
         console.error("Error al crear la fecha de evento:", error);
