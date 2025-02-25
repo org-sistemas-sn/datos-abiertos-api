@@ -8,7 +8,8 @@ import {
     getItemFile,
     getItemData,
     getItemsByName,
-    getItemSectionAndTheme
+    getItemSectionAndTheme,
+    getThemeByItemId
 } from "../controllers/itemController.js";
 
 const router = Router();
@@ -20,6 +21,7 @@ router.get("/:id", getItemById);
 router.get("/:id/file", getItemFile);
 router.get("/:id/data", getItemData);
 router.get("/:id/section-theme", getItemSectionAndTheme);
+router.get("/:id/theme", getThemeByItemId);
 router.post("/", createItem);
 router.put("/:id", updateItem);
 router.delete("/:id", deleteItem);

@@ -58,6 +58,58 @@ export const getItemData = async (req, res) => {
 };
 
 
+
+export const getThemeByItemId = async (req, res) => { 
+    try {
+        const { id } = req.params;
+
+        // Buscar el item por su ID
+        const item = await Item.findByPk(id);
+        if (!item) {
+            console.log("❌ Item no encontrado");
+            return res.status(404).json({ error: "Item not found" });
+        }
+
+        // Buscar el theme al que pertenece el item
+        const theme = await Theme.findByPk(item.id_theme);
+        if (!theme) {
+            console.log("❌ Theme no encontrado para el item");
+            return res.status(404).json({ error: "Theme not found for the given item" });
+        }
+
+        // Buscar manualmente la sección del theme
+        const section = await Section.findByPk(theme.id_section, {
+            attributes: ["id", "name"]
+        });
+
+        // Buscar manualmente los items del theme
+        const items = await Item.findAll({
+            where: { id_theme: theme.id },
+            attributes: ["id", "name", "type", "url_or_ftp_path", "publication_date", "responsible", "maintenance", "have_gis_detail"]
+        });
+
+        // Construir la respuesta final sin usar .toJSON()
+        const response = {
+            id: theme.id,
+            name: theme.name,
+            description: theme.description,
+            id_section: theme.id_section,
+            section: section,
+            items
+        };
+
+        console.log("✅ Theme encontrado:", response);
+        res.json(response);
+    } catch (error) {
+        console.error("❌ Error al recuperar el theme:", error);
+        res.status(500).json({ error: "Error retrieving the theme" });
+    }
+};
+
+
+
+
+
 export const getItemFile = async (req, res) => {
     try {
         const { id } = req.params;
