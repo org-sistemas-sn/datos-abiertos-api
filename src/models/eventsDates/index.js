@@ -26,13 +26,14 @@ const EventDate = sequelize.define(
             allowNull: false,
         },
         enabled: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: true,
+            type: DataTypes.SMALLINT,
+            defaultValue: 1, 
         },
     },
     {
         timestamps: true,
         paranoid: true,
+        schema: 'datos-abiertos'
     }
 );
 

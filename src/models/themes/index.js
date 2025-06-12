@@ -29,13 +29,14 @@ const Theme = sequelize.define(
             onDelete: 'SET NULL',
         },
         enabled: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: true, 
+            type: DataTypes.SMALLINT,
+            defaultValue: 1, 
         },
     },
     {
         timestamps: true,
         paranoid: true,
+        schema: 'datos-abiertos'
     }
 );
 

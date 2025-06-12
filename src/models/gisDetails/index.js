@@ -37,8 +37,8 @@ const GisDetail = sequelize.define(
             allowNull: true,
         },
         smm: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
+            type: DataTypes.SMALLINT,
+            defaultValue: 0
         },
         management: {
             type: DataTypes.STRING,
@@ -49,6 +49,7 @@ const GisDetail = sequelize.define(
         tableName: "gis_details",
         timestamps: true,
         paranoid: true,
+        schema: 'datos-abiertos'
     }
 );
 

@@ -5,7 +5,7 @@ import EventDate from "../models/eventsDates/index.js";
 export const getAllEventDates = async (req, res) => {
     try {
         const eventDates = await EventDate.findAll({
-            where: { enabled: true }, // Solo eventos activos
+            where: { enabled: 1 }, // Solo eventos activos
             order: [["date", "ASC"]], // Ordenados por fecha
             attributes: ["id", "date", "title", "description", "img_path", "enabled"] // Asegurar que el ID se incluya
         });
@@ -47,7 +47,7 @@ export const getEventDatesByMonthYear = async (req, res) => {
                     [Op.gte]: startDate,  // Mayor o igual que el primer día del mes
                     [Op.lt]: endDate      // Menor que el primer día del siguiente mes
                 },
-                enabled: true // Solo traer eventos activos
+                enabled: 1 // Solo traer eventos activos
             },
             order: [["date", "ASC"]],
             attributes: ["id", "date", "title", "description", "img_path", "enabled"]

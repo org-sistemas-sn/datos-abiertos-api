@@ -16,7 +16,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
   host: DB_HOST,
   dialect: DB_DIALECT,
   logging: SEQUELIZE_LOGGING,
-  query: { raw: SEQUELIZE_RAW_QUERIES },
+  port: 5000
 });
 
 export const syncDb = async () => {

@@ -19,13 +19,14 @@ const Section = sequelize.define(
             type: DataTypes.STRING,
         },
         enabled: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: true, 
+            type: DataTypes.SMALLINT,
+            defaultValue: 1,  
         },
     },
     {
         timestamps: true,
         paranoid: true,
+        schema: 'datos-abiertos'
     }
 );
 

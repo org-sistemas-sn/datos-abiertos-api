@@ -47,17 +47,18 @@ const Item = sequelize.define(
             type: DataTypes.STRING,
         },
         have_gis_detail: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false, 
+            type: DataTypes.SMALLINT,
+            defaultValue: 0, 
         },
         enabled: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: true, 
+            type: DataTypes.SMALLINT,
+            defaultValue: 1,
         },
     },
     {
         timestamps: true,
         paranoid: true,
+        schema: 'datos-abiertos'
     }
 );
 
